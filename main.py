@@ -87,7 +87,6 @@ if __name__ == '__main__':
     data = randomize(list(range(0, 3)))
 
     res = partitioned
-    # print(res.keys())
     pprint(res)
 
 
