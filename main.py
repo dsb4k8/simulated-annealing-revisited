@@ -18,7 +18,7 @@ def randomize(student_list: list[int]) -> list[int]:
     # print(acc)
     return acc
 
-def swap(index1: int, index2: int, d: dict[int, list[int]]) -> dict[int, list[int]]:
+def swap(index1: int, index2: int, d: dict[tuple[int, int], tuple[list[int], float]]) -> dict[tuple[int, int], tuple[list[int], float]]:
     res = d
     keys = list(d.keys())
 
@@ -86,24 +86,34 @@ if __name__ == '__main__':
     # for pair in results:
     #     print(pair)
 
-    swapped = swap(idx1, idx2, states_init)
-    # k, v = swapped.keys(), swapped.values()
-    swapped_results = zip(swapped.keys(), swapped.values())
+    # swapped = swap(idx1, idx2, states)
+    # # k, v = swapped.keys(), swapped.values()
+    # swapped_results = zip(swapped.keys(), swapped.values())
 
-    r = list(range(0, 5))
-    # print(r)
-    data = randomize(list(range(0, 3)))
+    # r = list(range(0, 5))
+    # # print(r)
+    # data = randomize(list(range(0, 3)))
 
     # filter results, removing overflow instances.
     # This is for the sake of convenience -for example, if this program is used to find
     # the most egalitarian assignment of students to professors given student's ranked preferences,
-    # this ensures
+    # this ensures... nevermind not needed
     # res = {
     #     key: value for key, value in states_partitioned.items() if key[1] <= (n_preferences - 1)
     # }
 
     res = states
-    pprint(res)
+    vals = states.values()
+    loss = list(vals.mapping.values())
+    l: list[float] = []
+    for i in vals:
+        n = i[1]
+        l.append(n)
+    s = sum(l)
+
+    print(f"{'Sum' :<24}{'Loss' :<24}")
+    print(f"{s :<24}{s/n_nodes :<24}")
+    # pprint(res)
 
 
 
