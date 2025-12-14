@@ -1,5 +1,6 @@
-import math
 import random
+from math import exp
+from math import pow
 from pprint import pprint
 
 
@@ -18,7 +19,7 @@ def randomize(student_list: list[int]) -> list[int]:
     # print(acc)
     return acc
 
-def swap(index1: int, index2: int, d: dict[tuple[int, int], tuple[list[int], float]]) -> dict[tuple[int, int], tuple[list[int], float]]:
+def swap(index1: int, index2: int, d: dict[tuple[int, int], list[int]]) -> dict[tuple[int, int], tuple[list[int], float]]:
     res = d
     keys = list(d.keys())
 
@@ -26,6 +27,7 @@ def swap(index1: int, index2: int, d: dict[tuple[int, int], tuple[list[int], flo
     second = keys[index2]
 
     res[first], res[second] = res[second], res[first]
+    res = initialize_loss(res)
     return res
 
 def initialize(n_node: int, n_preference: int ) -> dict[int, list[int]]:
@@ -60,7 +62,14 @@ def initialize_loss(d: dict[tuple[int, int], list[int]]) -> dict[tuple[int, int]
     return res
 
 def get_loss(id: tuple[int, int], ranked_prefs: list[int]) -> float:
-    return math.pow(ranked_prefs.index(id[1]), 2)
+    return pow(ranked_prefs.index(id[1]), 2)
+
+def prob_swap(s1: float, s2: float,  temp: float) -> float:
+    delta = s2-s1
+    return 1/(1+exp(delta/temp))
+
+def update_temp(temp: float, i: int) -> float:
+    return pow(temp * 0.95, float(i))
 
 
 if __name__ == '__main__':
