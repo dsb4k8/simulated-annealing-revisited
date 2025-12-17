@@ -1,3 +1,4 @@
+import datetime
 import random
 from math import exp
 from math import pow
@@ -64,12 +65,12 @@ def initialize_loss(d: dict[tuple[int, int], list[int]]) -> dict[tuple[int, int]
 def get_loss(id: tuple[int, int], ranked_prefs: list[int]) -> float:
     return pow(ranked_prefs.index(id[1]), 2)
 
-def prob_swap(s1: float, s2: float,  temp: float) -> float:
-    delta = s2-s1
-    return 1/(1+exp(delta/temp))
+def prob_swap(newv: float, currentv: float,  temp: float) -> float:
+    delta = newv - currentv
+    return 1.0 - (1.0/(1.0+exp(delta/temp)))
 
-def update_temp(temp: float, i: int) -> float:
-    return pow(temp * 0.95, float(i))
+def update_temp(temp: float, factor: float) -> float:
+    return temp * factor
 
 
 if __name__ == '__main__':
@@ -126,29 +127,63 @@ if __name__ == '__main__':
     #where ever you want to write your output to
     outpath = ""
     c = 0
-    with open(f"{outpath}simulated_annealing_output", "w") as file:
-        while(s/n_nodes > 2.8):
-            #setup
-            states_init = initialize(n_nodes, n_preferences)
-            states_partitioned = partition(states_init, n_preferences)
-            states = initialize_loss(states_partitioned)
-            res = states
-            vals = states.values()
-            loss = list(vals.mapping.values())
-            l: list[float] = []
-            for i in vals:
-                n = i[1]
-                l.append(n)
-            s = sum(l)
-            c += 1
-            print(c, s/n_nodes )
-            continue
-        file.write(f"{'Id' :<6}{'Partition #' :<15}{'Preferences' :<22}{'Loss' :<24}\n")
-        for rec in zip(states.keys(), states.values()):
-            file.write(f"{rec[0][0] :<6}{rec[0][1] :<15}{str(rec[1][0]) :<22}{rec[1][1] :<24}\n")
 
-        file.write(f"{'Sum' :<24}{'Loss' :<24}\n")
-        file.write(f"{s :<24}{s / n_nodes :<24}")
+    now = datetime.datetime.now()
+    formatted_date = now.strftime('%a, %d %b %Y, %I:%M:%S %p')
+    # 1.47 was the record achieved loss
+    # new record: 151655 1.0476190476190477
+
+    #LOGGING START
+    # with open(f"{outpath}simulated_annealing_output_{formatted_date}", "w") as file:
+    #     while(s/n_nodes > 1.6):
+    #         #setup
+    #         states_init = initialize(n_nodes, n_preferences)
+    #         states_partitioned = partition(states_init, n_preferences)
+    #         states = initialize_loss(states_partitioned)
+    #         res = states
+    #         vals = states.values()
+    #         loss = list(vals.mapping.values())
+    #         l: list[float] = []
+    #         for i in vals:
+    #             n = i[1]
+    #             l.append(n)
+    #         s = sum(l)
+    #         c += 1
+    #         print(c, s/n_nodes )
+    #         continue
+    #     file.write(f"{'Id' :<6}{'Partition #' :<15}{'Preferences' :<22}{'Loss' :<24}\n")
+    #     for rec in zip(states.keys(), states.values()):
+    #         file.write(f"{rec[0][0] :<6}{rec[0][1] :<15}{str(rec[1][0]) :<22}{rec[1][1] :<24}\n")
+    #
+    #     file.write(f"{'Sum' :<24}{'Loss' :<24}\n")
+    #     file.write(f"{s :<24}{s / n_nodes :<24}")
+        # LOGGING END
+    res_collection = []
+    for i in range(0, 2):
+        states_init = initialize(n_nodes, n_preferences)
+        states_partitioned = partition(states_init, n_preferences)
+        states = initialize_loss(states_partitioned)
+        res = states
+        vals = states.values()
+        loss = list(vals.mapping.values())
+        l: list[float] = []
+        for i in vals:
+            n = i[1]
+            l.append(n)
+        s = sum(l)
+        loss_delta = s / n_nodes
+        res_collection.append(loss_delta)
+    loss_delta = s / n_nodes
+    print(f"{'Sum' :<24}{'Loss' :<24}{'Probability of Acceptance' :<24}{'Temperature' :<24}\n")
+
+    temp = 100.0
+    while(temp > 0.1):
+        print(f"{s :<24}{loss_delta :<24}{prob_swap(res_collection[1], res_collection[0], temp) :<24}{temp:<24}")
+        temp = update_temp(temp, 0.95 )
+        # print(f"\n {prob_swap(res_collection[1], res_collection[0], temp)}")
+    print(f"new: {res_collection[0]}\ncurrent:   {res_collection[1]}")
+
+
 
 
 
