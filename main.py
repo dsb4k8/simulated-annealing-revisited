@@ -20,7 +20,7 @@ def randomize(student_list: list[int]) -> list[int]:
     # print(acc)
     return acc
 
-def swap(index1: int, index2: int, d: dict[tuple[int, int], list[int]]) -> dict[tuple[int, int], tuple[list[int], float]]:
+def swap(index1: int, index2: int, d: dict[tuple[int, int], tuple[list[int], float]]) -> dict[tuple[int, int], tuple[list[int], float]]:
     res = d
     keys = list(d.keys())
 
@@ -54,16 +54,25 @@ def partition(d: dict[int, list[int]], n_preference: int) -> dict[tuple[int, int
             res.update(upd)
     return res
 
-def initialize_loss(d: dict[tuple[int, int], list[int]]) -> dict[tuple[int, int], tuple[list[int], float]]:
+def initialize_loss(d: dict[tuple[int, int], tuple[list[int], float]]) -> dict[tuple[int, int], tuple[list[int], float]]:
     res = {}
-    for i in d.keys():
-        loss = get_loss(i, d[i])
-        update = {i:(d[i], loss)}
-        res.update(update)
+    # for r in d:
+    #
+    #
+    for k,v in zip(d.keys(),d.values(), strict=True):
+        ns = k[1]
+        lst = v
+        if ns in lst:
+            loss_update = get_loss(k, v)
+            update = {k:(v, loss_update)}
+            res.update(update)
     return res
 
-def get_loss(id: tuple[int, int], ranked_prefs: list[int]) -> float:
-    return pow(ranked_prefs.index(id[1]), 2)
+def get_loss(id: tuple[int, int], prefs_ranked: tuple[list[int], float]) -> float:
+    r_prefs = prefs_ranked
+    print(f"{r_prefs}, {id[1]}")
+    base = r_prefs.index(id[1])
+    return pow(base, 2)
 
 def prob_swap(newv: float, currentv: float,  temp: float) -> float:
     delta = newv - currentv
@@ -71,6 +80,22 @@ def prob_swap(newv: float, currentv: float,  temp: float) -> float:
 
 def update_temp(temp: float, factor: float) -> float:
     return temp * factor
+
+
+def calculate_average_of_floats(data_dict: dict[tuple[int, int], tuple[list[int], float]]) -> float:
+    total_sum = 0.0
+    count = 0
+
+    for value_tuple in data_dict.values():
+        float_value = value_tuple[1]
+        total_sum += float_value
+        count += 1
+
+    # Avoid division by zero
+    if count == 0:
+        return 0.0
+
+    return total_sum / count
 
 
 if __name__ == '__main__':
@@ -116,6 +141,7 @@ if __name__ == '__main__':
     vals = states.values()
     loss = list(vals.mapping.values())
     l: list[float] = []
+    l: list[float] = []
     for i in vals:
         n = i[1]
         l.append(n)
@@ -158,6 +184,8 @@ if __name__ == '__main__':
     #     file.write(f"{'Sum' :<24}{'Loss' :<24}\n")
     #     file.write(f"{s :<24}{s / n_nodes :<24}")
         # LOGGING END
+
+#START LOGGING
     res_collection = []
     for i in range(0, 2):
         states_init = initialize(n_nodes, n_preferences)
@@ -173,6 +201,7 @@ if __name__ == '__main__':
         s = sum(l)
         loss_delta = s / n_nodes
         res_collection.append(loss_delta)
+        res_collection.append(loss_delta)
     loss_delta = s / n_nodes
     print(f"{'Sum' :<24}{'Loss' :<24}{'Probability of Acceptance' :<24}{'Temperature' :<24}\n")
 
@@ -182,14 +211,38 @@ if __name__ == '__main__':
         temp = update_temp(temp, 0.95 )
         # print(f"\n {prob_swap(res_collection[1], res_collection[0], temp)}")
     print(f"new: {res_collection[0]}\ncurrent:   {res_collection[1]}")
+#END LOGGING
+
+    temp = 100.0
+    while temp > 0.1:
+        print(f"{s :<24}{loss_delta :<24}{prob_swap(res_collection[1], res_collection[0], temp) :<24}{temp:<24}")
+        temp = update_temp(temp, 0.95)
+        r1 = random.randint(0, len(states)-1)
+        r2 = random.randint(0, len(states)-1)
+
+        curr_loss = calculate_average_of_floats(states)
+        switched = swap(r1, r2, states)
+        # states = initialize_loss(states)
+        # prop_loss = swap(r1, r2, res)
+        # probability_of_swap = prob_swap()
+        #
 
 
 
 
 
 
-    # pprint(states)
-    # pprint(res)
+
+
+
+
+    pprint(states)
+    print("\n")
+    pprint(res)
+
+    print(states.__eq__(res))
+
+
 
 
 
