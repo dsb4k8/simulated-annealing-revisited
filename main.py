@@ -20,16 +20,13 @@ def randomize(student_list: list[int]) -> list[int]:
     # print(acc)
     return acc
 
-def swap(index1: int, index2: int, d: dict[tuple[int, int], tuple[list[int], float]]) -> dict[tuple[int, int], tuple[list[int], float]]:
-    res = d
-    keys = list(d.keys())
+def swap(t: tuple[int, int], d: dict[tuple[int, int], tuple[list[int], float]]) -> dict[tuple[int, int], tuple[list[int], float]]:
+    key1, key2 = t
 
-    first = keys[index1]
-    second = keys[index2]
+    # Direct swap using the keys provided
+    d[key1], d[key2] = d[key2], d[key1]
 
-    res[first], res[second] = res[second], res[first]
-    res = initialize_loss(res)
-    return res
+    return d
 
 def initialize(n_node: int, n_preference: int ) -> dict[int, list[int]]:
     ordered_preferences = {}
@@ -55,22 +52,42 @@ def partition(d: dict[int, list[int]], n_preference: int) -> dict[tuple[int, int
     return res
 
 def initialize_loss(d: dict[tuple[int, int], tuple[list[int], float]]) -> dict[tuple[int, int], tuple[list[int], float]]:
-    res = {}
-    # for r in d:
+    updated = {}
+    for key in d:
+        key_partition = key[1]
+        preferences = list(d[key])
+        p0 = preferences[0]
+        try:
+            # print(f"PREFS: {preferences}")
+            idx = preferences.index(key_partition)
+            print(idx)
+            # print(f"KP, IDX: {key_partition, idx}")
+            new_loss = pow(idx, 2)
+            updated[key] = (preferences, new_loss)
+        except ValueError:
+            # print(f"Warning: Preference Set {preferences} not found in the list for Key {key_partition} ")
+            # updated[key] = d[key]
+            continue
+    return updated
+
+    # for key in d:
+    #     key_partition = key[1]
+    #     preferences = d[key][0]
+
     #
-    #
-    for k,v in zip(d.keys(),d.values(), strict=True):
-        ns = k[1]
-        lst = v
-        if ns in lst:
-            loss_update = get_loss(k, v)
-            update = {k:(v, loss_update)}
-            res.update(update)
-    return res
+    #     try:
+    #         idx = preferences.index(key_partition)
+    #         new_loss = pow(idx, 2)
+    #         d[key] = (preferences, new_loss)
+    #     except ValueError:
+    #         print(f"Warning: Preference Set {preferences} not found in the list for Key {key_partition} ")
+    #         continue
+    # return d
+
 
 def get_loss(id: tuple[int, int], prefs_ranked: tuple[list[int], float]) -> float:
     r_prefs = prefs_ranked
-    print(f"{r_prefs}, {id[1]}")
+    # print(f"{r_prefs}, {id[1]}")
     base = r_prefs.index(id[1])
     return pow(base, 2)
 
@@ -203,31 +220,29 @@ if __name__ == '__main__':
         res_collection.append(loss_delta)
         res_collection.append(loss_delta)
     loss_delta = s / n_nodes
-    print(f"{'Sum' :<24}{'Loss' :<24}{'Probability of Acceptance' :<24}{'Temperature' :<24}\n")
+    # print(f"{'Sum' :<24}{'Loss' :<24}{'Probability of Acceptance' :<24}{'Temperature' :<24}\n")
 
-    temp = 100.0
-    while(temp > 0.1):
-        print(f"{s :<24}{loss_delta :<24}{prob_swap(res_collection[1], res_collection[0], temp) :<24}{temp:<24}")
-        temp = update_temp(temp, 0.95 )
+    # temp = 100.0
+    # while(temp > 0.1):
+        # print(f"{s :<24}{loss_delta :<24}{prob_swap(res_collection[1], res_collection[0], temp) :<24}{temp:<24}")
+        # temp = update_temp(temp, 0.95 )
         # print(f"\n {prob_swap(res_collection[1], res_collection[0], temp)}")
-    print(f"new: {res_collection[0]}\ncurrent:   {res_collection[1]}")
+    # print(f"new: {res_collection[0]}\ncurrent:   {res_collection[1]}")
 #END LOGGING
 
-    temp = 100.0
-    while temp > 0.1:
-        print(f"{s :<24}{loss_delta :<24}{prob_swap(res_collection[1], res_collection[0], temp) :<24}{temp:<24}")
-        temp = update_temp(temp, 0.95)
-        r1 = random.randint(0, len(states)-1)
-        r2 = random.randint(0, len(states)-1)
-
-        curr_loss = calculate_average_of_floats(states)
-        switched = swap(r1, r2, states)
-        # states = initialize_loss(states)
-        # prop_loss = swap(r1, r2, res)
-        # probability_of_swap = prob_swap()
-        #
-
-
+    # temp = 100.0
+    # while temp > 0.1:
+    #     # print(f"{s :<24}{loss_delta :<24}{prob_swap(res_collection[1], res_collection[0], temp) :<24}{temp:<24}")
+    #     temp = update_temp(temp, 0.95)
+    #     r1 = random.randint(0, len(states)-1)
+    #     r2 = random.randint(0, len(states)-1)
+    #
+    #     curr_loss = calculate_average_of_floats(states)
+    #     switched = swap(r1, r2, states)
+    #     # states = initialize_loss(states)
+    #     # prop_loss = swap(r1, r2, res)
+    #     # probability_of_swap = prob_swap()
+    #     #
 
 
 
@@ -236,11 +251,54 @@ if __name__ == '__main__':
 
 
 
+
+    print("Staates")
+    state_breakup = states
+
+
+
+    # for e in state_breakup:
+    #     print(e)
+    keys = list(states.keys())
+    k1, k2 = random.sample(keys, 2)
+
+    # states[k1], states[k2] = states[k2], states[k1]
+
+
+    print("NORMAL:")
     pprint(states)
-    print("\n")
-    pprint(res)
+    # print(f"Normal Average: {calculate_average_of_floats(states)}")
+    print(f"\nSWAPPING {k1}, and {k2}\n")
+    # print("SWAPPED:")
+    #
+    s = swap((k1, k2), states)
+    print("s\n")
+    pprint(s)
 
-    print(states.__eq__(res))
+    #
+    # check = {k: (s[k], states[k]) for k in s if k in states and s[k] != states[k]}
+    # print("check")
+    # pprint(check)
+    # print("\n")
+    #
+    # pprint(f"set(s) - set(states) = {set(s) - set(states)}")
+    # swapped = initialize_loss(s)
+    # print("initialized loss")
+    # # pprint(swapped)
+    # print(f"SWAPPED Average: {calculate_average_of_floats(swapped)}")
+    # print("\n")
+    # print(f"SWAPPED SIZE:{len(swapped)}")
+    #
+    #
+    #
+    # # states = initialize_loss(states)
+    # # print("initted Staates")
+    # #
+    # # pprint(states)
+    # # print("\n")
+    # # pprint(res)
+    #
+    # # print(states.__eq__(res))
 
 
 
